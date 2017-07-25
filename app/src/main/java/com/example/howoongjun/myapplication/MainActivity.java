@@ -1,4 +1,3 @@
-
 package com.example.howoongjun.myapplication;
 
 import android.Manifest;
@@ -8,13 +7,10 @@ import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
 import android.os.Build;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -22,31 +18,27 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 
 import android.content.ContentValues;
 import android.os.AsyncTask;
-import android.widget.EditText;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
@@ -70,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
     BluetoothGatt bluetoothGatt;
     ImageView iv = null;
     HttpClient httpclient = HttpClients.createDefault();
+
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     private BluetoothAdapter.LeScanCallback leScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
@@ -241,7 +235,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        
         if (Build.VERSION.SDK_INT >= 23) {
             // Marshmallow+ Permission APIs
             fuckMarshMallow();
