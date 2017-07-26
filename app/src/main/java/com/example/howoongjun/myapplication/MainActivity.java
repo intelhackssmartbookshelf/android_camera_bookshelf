@@ -126,6 +126,9 @@ public class MainActivity extends AppCompatActivity {
             if (entity != null)
             {
                 System.out.println(EntityUtils.toString(entity));
+                // add notification - send entity
+
+
             }
         }
         catch (Exception e)
@@ -297,65 +300,25 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public class NetworkTask extends AsyncTask<Void, Void, String>{
+    public class NetworkTask extends AsyncTask<Void, Void, String> {
         private String url;
         private ContentValues values;
 
-        public NetworkTask(String url, ContentValues values){
+        public NetworkTask(String url, ContentValues values) {
             this.url = url;
             this.values = values;
         }
 
-        protected String doInBackground(Void... params){
+        protected String doInBackground(Void... params) {
             String result;
             RequestHttpURLConnection requestHttpURLConnection = new RequestHttpURLConnection();
-            result = requestHttpURLConnection.request(url,values);
+            result = requestHttpURLConnection.request(url, values);
             return result;
         }
 
-        protected void onPostExecute(String s){
+        protected void onPostExecute(String s) {
             super.onPostExecute(s);
         }
     }
-
-
-//
-//
-//    Button.OnClickListener mClickListener = new View.OnClickListener(){
-//        public void onClick(View v){
-//            HttpClient httpclient = HttpClients.createDefault();
-//
-//            try
-//            {
-//                URIBuilder builder = new URIBuilder("https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/ocr");
-//
-//                builder.setParameter("language", "unk");
-//                builder.setParameter("detectOrientation ", "true");
-//
-//                URI uri = builder.build();
-//                HttpPost request = new HttpPost(uri);
-//                request.setHeader("Content-Type", "application/json");
-//                request.setHeader("Ocp-Apim-Subscription-Key", "c038525346344e78b3dbe75994653853");
-//
-//
-//                // Request body
-//                StringEntity reqEntity = new StringEntity("http://cfile25.uf.tistory.com/image/243983425903E78A1A684C");
-//                request.setEntity(reqEntity);
-//
-//                HttpResponse response = httpclient.execute(request);
-//                HttpEntity entity = response.getEntity();
-//
-//                if (entity != null)
-//                {
-//                    System.out.println(EntityUtils.toString(entity));
-//                }
-//            }
-//            catch (Exception e)
-//            {
-//                System.out.println(e.getMessage());
-//            }
-//        }
-//    };
-
 
 }
