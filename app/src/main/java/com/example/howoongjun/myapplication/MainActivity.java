@@ -18,6 +18,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import java.io.IOException;
 import java.net.URI;
 
 import android.content.ContentValues;
@@ -26,6 +28,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -36,15 +39,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.RunnableFuture;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -61,7 +65,8 @@ public class MainActivity extends AppCompatActivity {
     Button mButtonStart;
     BluetoothGatt bluetoothGatt;
     ImageView iv = null;
-    HttpClient httpclient = HttpClients.createDefault();
+    OkHttpClient client = new OkHttpClient();
+    TextView txtString;
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
@@ -106,30 +111,28 @@ public class MainActivity extends AppCompatActivity {
         //MS API
         try
         {
-            URIBuilder builder = new URIBuilder("https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/ocr");
+            String url = "https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/ocr?language=en&detectOrientation=true";
+            RequestBody reqBody = new FormBody.Builder().add("Content-Type", "application/octet-stream").add("Ocp-Apim-Subscription-Key", "c038525346344e78b3dbe75994653853").build();
+            Request request = new Request.Builder().url(url).post(reqBody).build();
 
-            builder.setParameter("language", "en");
-            builder.setParameter("detectOrientation ", "true");
+            client.newCall(request).enqueue(new Callback(){
+                @Override
+                public void onFailure(Call call, IOException e){
+                    call.cancel();
+                }
 
-            URI uri = builder.build();
-            HttpPost request = new HttpPost(uri);
-            request.setHeader("Content-Type", "application/octet-stream");
-            request.setHeader("Ocp-Apim-Subscription-Key", "c038525346344e78b3dbe75994653853");
+                @Override
+                public void onResponse(Call call, Response response) throws IOException{
+                    final String myResponse =response.body().string();
+                    MainActivity.this.runOnUiThread(new Runnable(){
+                        @Override
+                        public void run(){
+                            txtString.setText(myResponse);
+                        }
 
-            // Request body
-            StringEntity reqEntity = new StringEntity(data.getData().toString());
-            request.setEntity(reqEntity);
-
-            HttpResponse response = httpclient.execute(request);
-            HttpEntity entity = response.getEntity();
-
-            if (entity != null)
-            {
-                System.out.println(EntityUtils.toString(entity));
-                // add notification - send entity
-
-
-            }
+                    });
+                }
+            });
         }
         catch (Exception e)
         {
@@ -150,9 +153,7 @@ public class MainActivity extends AppCompatActivity {
                     perms.put(permissions[i], grantResults[i]);
 
                 // Check for ACCESS_FINE_LOCATION
-                if (perms.get(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-
-                        ) {
+                if (perms.get(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     // All Permissions Granted
 
                     // Permission Denied
