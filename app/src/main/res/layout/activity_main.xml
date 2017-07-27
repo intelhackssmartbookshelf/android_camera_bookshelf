@@ -12,6 +12,26 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="Bluetooth Access"
+        android:id="@+id/btnBlu"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Camera Access"
+        android:id="@+id/btnCam"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Storage Access"
+        android:id="@+id/btnSto"
+        />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:text="Start"
         android:id="@+id/btnStart"
         />

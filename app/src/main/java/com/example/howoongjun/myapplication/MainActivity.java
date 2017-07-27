@@ -2,6 +2,7 @@ package com.example.howoongjun.myapplication;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -12,6 +13,8 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -55,6 +58,12 @@ public class MainActivity extends AppCompatActivity {
     // 사용자 정의 함수로 블루투스 활성 상태의 변경 결과를 App으로 알려줄때 식별자로 사용됨(0보다 커야함)
     static final int REQUEST_ENABLE_BT = 10;
 
+    private static final int REQUEST_BLUETOOTH = 3;
+    private static final int REQUEST_EXTERNAL_STORAGE = 2;
+    private static final int REQUEST_CAMERA = 1;
+;
+
+    private Activity mainActivity = this;
     // 폰의 블루투스 모듈을 사용하기 위한 오브젝트.
     BluetoothDevice bluetoothDevice;
 
@@ -140,38 +149,120 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private View.OnClickListener buttonClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            int id = v.getId();
+            switch (id) {
+                case R.id.btnCam:
+                    int permissionCamera = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA);
+                    if(permissionCamera == PackageManager.PERMISSION_DENIED) {
+                        ActivityCompat.requestPermissions(mainActivity, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA);
+                    } else {
+                        Toast.makeText(MainActivity.this,"camera permission authorized",Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case R.id.btnSto:
+                    int permissionReadStorage = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE);
+                    int permissionWriteStorage = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                    if(permissionReadStorage == PackageManager.PERMISSION_DENIED || permissionWriteStorage == PackageManager.PERMISSION_DENIED) {
+                        ActivityCompat.requestPermissions(mainActivity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_EXTERNAL_STORAGE);
+                    } else {
+                        Toast.makeText(MainActivity.this,"read/write storage permission authorized",Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case R.id.btnBlu:
+                    int permissionBluetooth = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.BLUETOOTH);
+                    int permissionAudio = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.BLUETOOTH_ADMIN);
+                    if(permissionAudio == PackageManager.PERMISSION_DENIED || permissionBluetooth == PackageManager.PERMISSION_DENIED) {
+                        ActivityCompat.requestPermissions(mainActivity, new String[]{Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH}, REQUEST_BLUETOOTH);
+                    } else {
+                        Toast.makeText(MainActivity.this,"bluetooth permission authorized",Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+            }
+        }
+    };
+
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+//        switch (requestCode) {
+//            case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS: {
+//                Map<String, Integer> perms = new HashMap<String, Integer>();
+//                // Initial
+//                perms.put(Manifest.permission.ACCESS_FINE_LOCATION, PackageManager.PERMISSION_GRANTED);
+//                perms.put(Manifest.permission.BLUETOOTH, PackageManager.PERMISSION_GRANTED);
+//                perms.put(Manifest.permission.BLUETOOTH_ADMIN, PackageManager.PERMISSION_GRANTED);
+//                perms.put(Manifest.permission.CAMERA, PackageManager.PERMISSION_GRANTED);
+//
+//                // Fill with results
+//                for (int i = 0; i < permissions.length; i++)
+//                    perms.put(permissions[i], grantResults[i]);
+//
+//                // Check for ACCESS_FINE_LOCATION
+//                if (perms.get(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+//                    // All Permissions Granted
+//
+//                    // Permission Denied
+//                    Toast.makeText(MainActivity.this, "All Permission GRANTED !! Thank You :)", Toast.LENGTH_SHORT)
+//                            .show();
+//
+//
+//                } else {
+//                    // Permission Denied
+//                    Toast.makeText(MainActivity.this, "One or More Permissions are DENIED Exiting App :(", Toast.LENGTH_SHORT)
+//                            .show();
+//
+//                    finish();
+//                }
+//            }
+//            break;
+//            default:
+//                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        }
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
-            case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS: {
-                Map<String, Integer> perms = new HashMap<String, Integer>();
-                // Initial
-                perms.put(Manifest.permission.ACCESS_FINE_LOCATION, PackageManager.PERMISSION_GRANTED);
-
-                // Fill with results
-                for (int i = 0; i < permissions.length; i++)
-                    perms.put(permissions[i], grantResults[i]);
-
-                // Check for ACCESS_FINE_LOCATION
-                if (perms.get(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    // All Permissions Granted
-
-                    // Permission Denied
-                    Toast.makeText(MainActivity.this, "All Permission GRANTED !! Thank You :)", Toast.LENGTH_SHORT)
-                            .show();
-
-
-                } else {
-                    // Permission Denied
-                    Toast.makeText(MainActivity.this, "One or More Permissions are DENIED Exiting App :(", Toast.LENGTH_SHORT)
-                            .show();
-
-                    finish();
+            case REQUEST_CAMERA:
+                for (int i = 0; i < permissions.length; i++) {
+                    String permission = permissions[i];
+                    int grantResult = grantResults[i];
+                    if (permission.equals(Manifest.permission.CAMERA)) {
+                        if(grantResult == PackageManager.PERMISSION_GRANTED) {
+                            Toast.makeText(MainActivity.this,"camera permission authorized",Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MainActivity.this,"camera permission denied",Toast.LENGTH_SHORT).show();
+                        }
+                    }
                 }
-            }
-            break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                break;
+            case REQUEST_EXTERNAL_STORAGE:
+                for (int i = 0; i < permissions.length; i++) {
+                    String permission = permissions[i];
+                    int grantResult = grantResults[i];
+                    if (permission.equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                        if(grantResult == PackageManager.PERMISSION_GRANTED) {
+                            Toast.makeText(MainActivity.this,"read/write storage permission authorized", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MainActivity.this,"read/write storage permission denied", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+                break;
+            case REQUEST_BLUETOOTH:
+                for (int i = 0; i < permissions.length; i++) {
+                    String permission = permissions[i];
+                    int grantResult = grantResults[i];
+                    if (permission.equals(Manifest.permission.BLUETOOTH_ADMIN)) {
+                        if(grantResult == PackageManager.PERMISSION_GRANTED) {
+                            Toast.makeText(MainActivity.this, "bluetooth permission authorized!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MainActivity.this,"bluetooth permission denied", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+                break;
         }
     }
 
@@ -238,7 +329,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-        
+
+        Button cameraBtn = (Button)findViewById(R.id.btnCam);
+        Button storageBtn = (Button)findViewById(R.id.btnSto);
+        Button micBtn = (Button)findViewById(R.id.btnBlu);
+
+
+        cameraBtn.setOnClickListener(buttonClickListener);
+        storageBtn.setOnClickListener(buttonClickListener);
+        micBtn.setOnClickListener(buttonClickListener);
+
+
         if (Build.VERSION.SDK_INT >= 23) {
             // Marshmallow+ Permission APIs
             fuckMarshMallow();
